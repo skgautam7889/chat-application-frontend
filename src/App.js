@@ -2,6 +2,7 @@ import './App.css';
 import { UserAuthProvider } from './Auth/UserAuthProvider';
 import {Navigate, Routes, Route } from "react-router-dom"
 import Login from './pages/auth/user/Login';
+import Signup from './pages/auth/user/Signup';
 
 function App() {
   return (
@@ -9,6 +10,7 @@ function App() {
       <Routes>
       <Route path='/' element={<Navigate to="/auth/login" />} />
         <Route path='/auth/login' element={<Login />} />
+        <Route path='/auth/signup' element={<Signup />} />
       </Routes>
       <UserAuthProvider>
         {/* <MainLayout >
