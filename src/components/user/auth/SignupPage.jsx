@@ -1,5 +1,5 @@
 import React from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import FormControlLabel from "@mui/material/FormControlLabel";
@@ -9,10 +9,41 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 
+import { useForm } from 'react-hook-form';
+import { yupResolver } from '@hookform/resolvers/yup';
+import * as yup from "yup";
+import { UserAuthentication } from "../../../Services/UserAuthentication"
 function SignupPage() {
-    const handleSubmit = () => {
+    const navigate = useNavigate()
+    const validationSchema = yup.object().shape({
+        firstName: yup.string()
+            .required('First Name is required'),
+        lastName: yup.string()
+            .required('Last name is required'),
+        email: yup.string()
+            .required('Email is required')
+            .email('Email is invalid'),
+        password: yup.string()
+            .required('Password is required'),
+    });
+    const { register, handleSubmit, reset, formState: { errors } } = useForm({
+        resolver: yupResolver(validationSchema)
+    });
+    const onSubmit = async (data) => {
+        let userInfo = {
+            name: data.firstName + ' ' + data.lastName,
+            email: data.email,
+            password: data.password,
+            password2: data.password 
+        }
+        const user =  await UserAuthentication.UserSignup(userInfo);
+        if(user.status){
+            reset();
+            navigate("/auth/login");
+        }
+        console.log("==> User Authentication",user);
+    };
 
-    }
     return (
         <>
             <Container component="main" maxWidth="sm">
@@ -31,11 +62,12 @@ function SignupPage() {
                     <Typography component="h1" variant="h5">
                         Sign Up
                     </Typography>
-                    <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+                    <Box component="form" onSubmit={handleSubmit(onSubmit)} noValidate sx={{ mt: 1 }}>
 
                         <Grid container spacing={2}>
                             <Grid item xs={12} sm={6}>
                                 <TextField
+                                    {...register('lastName')}
                                     autoComplete="given-name"
                                     name="firstName"
                                     required
@@ -43,7 +75,10 @@ function SignupPage() {
                                     id="firstName"
                                     label="First Name"
                                     autoFocus
+                                    {...register('firstName')}
+                                    className={`form-control ${errors.firstName ? 'is-invalid' : ''}`}
                                 />
+                                <div className="invalid-feedback">{errors.firstName?.message}</div>
                             </Grid>
                             <Grid item xs={12} sm={6}>
                                 <TextField
@@ -53,7 +88,10 @@ function SignupPage() {
                                     label="Last Name"
                                     name="lastName"
                                     autoComplete="family-name"
+                                    {...register('lastName')}
+                                    className={`form-control ${errors.lastName ? 'is-invalid' : ''}`}
                                 />
+                                <div className="invalid-feedback">{errors.lastName?.message}</div>
                             </Grid>
                             <Grid item xs={12}>
                                 <TextField
@@ -63,7 +101,10 @@ function SignupPage() {
                                     label="Email Address"
                                     name="email"
                                     autoComplete="email"
+                                    {...register('email')}
+                                    className={`form-control ${errors.email ? 'is-invalid' : ''}`}
                                 />
+                                <div className="invalid-feedback">{errors.email?.message}</div>
                             </Grid>
                             <Grid item xs={12}>
                                 <TextField
@@ -74,7 +115,10 @@ function SignupPage() {
                                     type="password"
                                     id="password"
                                     autoComplete="new-password"
+                                    {...register('password')}
+                                    className={`form-control ${errors.password ? 'is-invalid' : ''}`}
                                 />
+                                <div className="invalid-feedback">{errors.password?.message}</div>
                             </Grid>
                             <Grid item xs={12}>
                                 <FormControlLabel
